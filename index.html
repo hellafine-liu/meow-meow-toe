@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Meow Meow Meow</title>
-<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand:wght@400;700&display=swap" rel="stylesheet">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meow Meow Meow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand:wght@400;700&display=swap" rel="stylesheet">
 
 
   <style>
@@ -125,6 +127,46 @@ body::before {
 
   width: 100%;
 }
+/* --- MOBILE TWEAKS --- */
+@media (max-width: 768px) {
+  body {
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 24px;
+  }
+
+  .game-wrapper {
+    transform: scale(0.9);           /* slightly smaller on phones */
+    transform-origin: top center;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    text-align: center;
+  }
+
+  #status {
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
+  #board {
+    grid-template-columns: repeat(3, 90px);
+    grid-template-rows: repeat(3, 90px);
+    gap: 6px;
+  }
+
+  .cell {
+    width: 90px;
+    height: 90px;
+  }
+
+  button {
+    margin-top: 12px;
+    font-size: 1rem;
+    padding: 8px 18px;
+  }
+}	  
   </style>
 </head>
 <body>
