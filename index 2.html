@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meow Meow Meow</title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand:wght@400;700&display=swap" rel="stylesheet">
+
+
+  <style>
+    /* --- BASIC PAGE STYLING --- */
+    body {
+      font-family: "Patrick Hand", cursive, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: url("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/bdcba258-24a1-4e55-b254-f4b2af4cfdb1/d4p832e-2cbc021e-fa5e-43dd-81d3-ab365d62e24b.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi9iZGNiYTI1OC0yNGExLTRlNTUtYjI1NC1mNGIyYWY0Y2ZkYjEvZDRwODMyZS0yY2JjMDIxZS1mYTVlLTQzZGQtODFkMy1hYjM2NWQ2MmUyNGIuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.9HK0a36Ol4jPo7WqTO1AD8MYPN1__jYR01ARApYtnLo") no-repeat center center fixed;
+	background-size: cover;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    #status {
+      margin-bottom: 16px;
+      font-size: 1rem;
+    }
+
+    /* --- BOARD LAYOUT --- */
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      user-select: none;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+    }
+
+    .cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      background: #e5e7eb;
+    }
+
+    .cell.filled {
+      cursor: default;
+      background: #f9fafb;
+    }
+
+    .cell.win {
+  background: #c7a4ff; /* pastel lavender glow */
+}
+button {
+  padding: 8px 16px;
+  font-size: 1.1rem;
+  font-family: "Patrick Hand", cursive, sans-serif; /* FIXED FONT */
+  font-weight: 700;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255,255,255,0.2); /* slightly translucent */
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  backdrop-filter: blur(3px);
+}
+
+button:hover {
+  background: rgba(255,255,255,0.35);
+}
+    .cell img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+      pointer-events: none; /* so clicks still hit the cell */
+      border-radius: 12px;
+    }
+/* Make all key text white + bold */
+h1, #status, button {
+  color: white !important;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* makes it readable on images */
+}
+#status {
+  color: white !important;
+  font-weight: 700;
+}
+/* Soft overlay to make background less busy */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);  /* <-- adjust opacity here */
+  backdrop-filter: blur(2px);        /* <-- subtle blur */
+  z-index: -1;                       /* keeps overlay behind everything */
+}
+/* Scale the entire game by ~10% */
+.game-wrapper {
+  transform: scale(1.10);
+  transform-origin: top center;
+ /* NEW: keep it centered horizontally */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+}
+  </style>
+</head>
+<body>
+ <div class="game-wrapper">
+  <h1>LETS PLAY MEOW MEOW</h1>
+  <div id="status">YOUR TURN MEOW MEOW!!</div>
+
+  <div id="board">
+    <!-- 9 cells -->
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
+
+  <button id="reset-btn">Reset Game</button>
+  </div>
+
+    <script>
+    // --- SELECT ELEMENTS ---
+    const cells = Array.from(document.querySelectorAll('.cell'));
+    const statusEl = document.getElementById('status');
+    const resetBtn = document.getElementById('reset-btn');
+
+    // --- IMAGES (you can change these URLs!) ---
+    const HUMAN_IMG = "https://i.pinimg.com/736x/ed/70/7d/ed707d6943d0258c23cd496bfcaf85e6.jpg";   // You / Player image
+    const COMPUTER_IMG = "https://i.pinimg.com/736x/1e/50/83/1e5083294ec946fda30cfafccf7b67cc.jpg"; // Computer image
+
+    // --- GAME STATE ---
+    let board = Array(9).fill(null); // null, "H" (human), "C" (computer)
+    const HUMAN = "H";
+    const COMPUTER = "C";
+    let gameOver = false;
+
+    const winningCombos = [
+      [0,1,2],
+      [3,4,5],
+      [6,7,8],
+      [0,3,6],
+      [1,4,7],
+      [2,5,8],
+      [0,4,8],
+      [2,4,6],
+    ];
+
+    // --- HELPERS ---
+    function updateStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function setCellImage(cellIndex, type) {
+      const cell = cells[cellIndex];
+      cell.innerHTML = "";
+
+      const img = document.createElement("img");
+      img.src = type === HUMAN ? HUMAN_IMG : COMPUTER_IMG;
+      img.alt = type === HUMAN ? "You" : "Computer";
+      cell.appendChild(img);
+
+      cell.classList.add("filled");
+    }
+
+    function highlightWin(indices) {
+      indices.forEach(i => {
+        cells[i].classList.add('win');
+      });
+    }
+
+    function disableAllCells() {
+      cells.forEach(cell => {
+        cell.style.pointerEvents = "none";
+      });
+    }
+
+    function enableAllCells() {
+      cells.forEach((cell, index) => {
+        if (board[index] === null && !gameOver) {
+          cell.style.pointerEvents = "auto";
+        }
+      });
+    }
+
+    // --- CHECK GAME END ---
+    function checkGameEnd() {
+      // Winner?
+      for (const [a, b, c] of winningCombos) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          gameOver = true;
+          highlightWin([a, b, c]);
+          const winner = board[a] === HUMAN ? "Yay! 😸" : "meow man...😿";
+          updateStatus(winner);
+          disableAllCells();
+          return true;
+        }
+      }
+      // Draw?
+      if (board.every(cell => cell !== null)) {
+        gameOver = true;
+        updateStatus("cats suck dogs rule");
+        disableAllCells();
+        return true;
+      }
+      return false;
+    }
+
+    // --- COMPUTER (AI) MOVE ---
+    function computerMove() {
+      if (gameOver) return;
+
+      // 1. Try to win
+      let move = findBestMove(COMPUTER);
+      // 2. Try to block human
+      if (move === null) move = findBestMove(HUMAN);
+      // 3. Otherwise, pick from preferred spots
+      if (move === null) move = pickSmartMove();
+
+      if (move === null) return; // no moves left
+
+      board[move] = COMPUTER;
+      setCellImage(move, COMPUTER);
+
+      const ended = checkGameEnd();
+      if (!ended) {
+        updateStatus("YOUR TURN MEOW MEOW!!");
+        enableAllCells();
+      }
+    }
+
+    function findBestMove(player) {
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === null) {
+          board[i] = player;
+          const won = isWinningBoard(board, player);
+          board[i] = null;
+          if (won) return i;
+        }
+      }
+      return null;
+    }
+
+    function isWinningBoard(b, player) {
+      return winningCombos.some(([a, c, d]) => b[a] === player && b[c] === player && b[d] === player);
+    }
+
+    function pickSmartMove() {
+      const preferredOrder = [4, 0, 2, 6, 8, 1, 3, 5, 7];
+      const available = preferredOrder.filter(i => board[i] === null);
+      if (available.length === 0) return null;
+      return available[0];
+    }
+
+    // --- HANDLE HUMAN CLICK ---
+    function handleCellClick(event) {
+      const cell = event.target.closest('.cell');
+      if (!cell) return;
+      const index = parseInt(cell.getAttribute('data-index'), 10);
+
+      if (gameOver || board[index] !== null) {
+        return;
+      }
+
+      // Human move
+      board[index] = HUMAN;
+      setCellImage(index, HUMAN);
+
+      const ended = checkGameEnd();
+      if (ended) return;
+
+      // Computer's turn
+      updateStatus("Meow... Meow...");
+      disableAllCells();
+      setTimeout(computerMove, 500);
+    }
+
+    // --- RESET GAME ---
+    function resetGame() {
+      board = Array(9).fill(null);
+      gameOver = false;
+
+      cells.forEach(cell => {
+        cell.innerHTML = "";
+        cell.classList.remove('filled', 'win');
+        cell.style.pointerEvents = "auto";
+      });
+
+      updateStatus("YOUR TURN MEOW MEOW!!");
+    }
+
+    // --- EVENT LISTENERS ---
+    cells.forEach(cell => {
+      cell.addEventListener('click', handleCellClick);
+    });
+
+    resetBtn.addEventListener('click', resetGame);
+
+    // Initial state
+    resetGame();
+  </script>
+
+</body>
+</html>
